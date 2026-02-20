@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Escalation Decision Tree</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: '72', '72 Brand', Arial, sans-serif;
+            background-color: #FFFFFF;
+            color: #000000;
+            padding: 15px;
+            line-height: 1.6;
+            margin: 0;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 100%;
+            margin: 0 auto;
+            background-color: #FFFFFF;
+            padding: 20px;
+        }
+
+        h1 {
+            color: #1B90FF;
+            font-size: 28px;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid #1B90FF;
+            font-weight: 600;
+        }
+
+        .node {
+            display: none;
+            animation: fadeIn 0.4s ease-in;
+        }
+
+        .node.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .question {
+            background-color: #FFFFFF;
+            border-left: 4px solid #1B90FF;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+        }
+
+        .question-text {
+            font-size: 20px;
+            font-weight: 600;
+            color: #000000;
+            margin-bottom: 20px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 12px 30px;
+            font-size: 16px;
+            font-weight: 600;
+            border: 2px solid #0070F2;
+            background-color: #0070F2;
+            color: #FFFFFF;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: '72', '72 Brand', Arial, sans-serif;
+            min-width: 120px;
+        }
+
+        button:hover {
+            background-color: #1B90FF;
+            border-color: #1B90FF;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 112, 242, 0.3);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .end-node {
+            background: linear-gradient(135deg, #1B90FF 0%, #0070F2 100%);
+            color: #FFFFFF;
+            padding: 25px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 12px rgba(27, 144, 255, 0.3);
+        }
+
+        .end-node-title {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .end-node-title::before {
+            content: "✓";
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            background-color: #FFFFFF;
+            color: #1B90FF;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 30px;
+            font-weight: bold;
+        }
+
+        .end-node-content {
+            font-size: 16px;
+            line-height: 1.6;
+            margin-left: 40px;
+        }
+
+        .restart-button {
+            background-color: #FFFFFF;
+            color: #0070F2;
+            border: 2px solid #FFFFFF;
+            margin-top: 20px;
+        }
+
+        .restart-button:hover {
+            background-color: #EAECEE;
+            color: #0070F2;
+            border-color: #EAECEE;
+        }
+
+        .breadcrumb {
+            background-color: #EAECEE;
+            padding: 12px 20px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            color: #666666;
+        }
+
+        .breadcrumb-item {
+            display: inline;
+        }
+
+        .breadcrumb-item::after {
+            content: " → ";
+            margin: 0 8px;
+            color: #999999;
+        }
+
+        .breadcrumb-item:last-child::after {
+            content: "";
+        }
+
+        .progress-bar {
+            height: 4px;
+            background-color: #EAECEE;
+            border-radius: 2px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #1B90FF 0%, #0070F2 100%);
+            transition: width 0.4s ease;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>You have an escalation and you need help with it</h1>
+        
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressBar" style="width: 0%"></div>
+        </div>
+
+        <div class="breadcrumb" id="breadcrumb">
+            <span class="breadcrumb-item">Start</span>
+        </div>
+
+        <!-- Question 1 -->
+        <div class="node active" id="q1">
+            <div class="question">
+                <div class="question-text">Was it escalated on board level?</div>
+                <div class="button-group">
+                    <button onclick="navigate('q1', 'end1', 'Yes')">Yes</button>
+                    <button onclick="navigate('q1', 'q2', 'No')">No</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- End Node 1 -->
+        <div class="node" id="end1">
+            <div class="end-node">
+                <div class="end-node-title">Contact Core Customer Office</div>
+                <div class="end-node-content">
+                    Your escalation has been escalated at board level. Please contact the Core Customer Office for further assistance.
+                </div>
+            </div>
+            <button class="restart-button" onclick="restart()">Start Over</button>
+        </div>
+
+        <!-- Question 2 -->
+        <div class="node" id="q2">
+            <div class="question">
+                <div class="question-text">Do you have a ticket number?</div>
+                <div class="button-group">
+                    <button onclick="navigate('q2', 'q3', 'Yes')">Yes</button>
+                    <button onclick="navigate('q2', 'end2', 'No')">No</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- End Node 2 -->
+        <div class="node" id="end2">
+            <div class="end-node">
+                <div class="end-node-title">Get Ticket Number and Restart</div>
+                <div class="end-node-content">
+                    Please obtain a ticket number first, then restart the decision tree to find the appropriate next steps.
+                </div>
+            </div>
+            <button class="restart-button" onclick="restart()">Start Over</button>
+        </div>
+
+        <!-- Question 3 -->
+        <div class="node" id="q3">
+            <div class="question">
+                <div class="question-text">Is the case still running?</div>
+                <div class="button-group">
+                    <button onclick="navigate('q3', 'q4_1', 'Yes')">Yes</button>
+                    <button onclick="navigate('q3', 'q4_2', 'No')">No</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Question 4.1 -->
+        <div class="node" id="q4_1">
+            <div class="question">
+                <div class="question-text">Is it already escalated with the MCC?</div>
+                <div class="button-group">
+                    <button onclick="navigate('q4_1', 'q5', 'Yes')">Yes</button>
+                    <button onclick="navigate('q4_1', 'end3', 'No')">No</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- End Node 3 -->
+        <div class="node" id="end3">
+            <div class="end-node">
+                <div class="end-node-title">Escalate using the MCC SOS App</div>
+                <div class="end-node-content">
+                    Your case is still running but not yet escalated. Please escalate it using the MCC SOS App.
+                </div>
+            </div>
+            <button class="restart-button" onclick="restart()">Start Over</button>
+        </div>
+
+        <!-- Question 5 -->
+        <div class="node" id="q5">
+            <div class="question">
+                <div class="question-text">Are the TQM & Escalation Manager informed?</div>
+                <div class="button-group">
+                    <button onclick="navigate('q5', 'end4', 'Yes')">Yes</button>
+                    <button onclick="navigate('q5', 'end5', 'No')">No</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- End Node 4 -->
+        <div class="node" id="end4">
+            <div class="end-node">
+                <div class="end-node-title">Contact Core Customer Office</div>
+                <div class="end-node-content">
+                    Your case is properly escalated and all relevant parties are informed. Please contact the Core Customer Office for further assistance.
+                </div>
+            </div>
+            <button class="restart-button" onclick="restart()">Start Over</button>
+        </div>
+
+        <!-- End Node 5 -->
+        <div class="node" id="end5">
+            <div class="end-node">
+                <div class="end-node-title">Contact the TQM and Escalation Manager</div>
+                <div class="end-node-content">
+                    Your case is escalated with MCC, but the TQM & Escalation Manager need to be informed. Please contact them immediately.
+                </div>
+            </div>
+            <button class="restart-button" onclick="restart()">Start Over</button>
+        </div>
+
+        <!-- Question 4.2 -->
+        <div class="node" id="q4_2">
+            <div class="question">
+                <div class="question-text">Did the Customer initiate a complaint?</div>
+                <div class="button-group">
+                    <button onclick="navigate('q4_2', 'end6', 'Yes')">Yes</button>
+                    <button onclick="navigate('q4_2', 'end7', 'No')">No</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- End Node 6 -->
+        <div class="node" id="end6">
+            <div class="end-node">
+                <div class="end-node-title">Consult Global Complaint Management</div>
+                <div class="end-node-content">
+                    The customer has initiated a complaint. Please consult the Global Complaint Management SharePoint to see if they can help you with your request.
+                </div>
+            </div>
+            <button class="restart-button" onclick="restart()">Start Over</button>
+        </div>
+
+        <!-- End Node 7 -->
+        <div class="node" id="end7">
+            <div class="end-node">
+                <div class="end-node-title">PLACEHOLDER</div>
+                <div class="end-node-content">
+                    To be checked with Christine.
+                </div>
+            </div>
+            <button class="restart-button" onclick="restart()">Start Over</button>
+        </div>
+    </div>
+
+    <script>
+        let breadcrumbPath = ['Start'];
+        let currentStep = 0;
+        const totalSteps = 5; // Maximum depth of decision tree
+
+        function navigate(fromNode, toNode, answer) {
+            // Hide current node
+            document.getElementById(fromNode).classList.remove('active');
+            
+            // Show next node
+            document.getElementById(toNode).classList.add('active');
+            
+            // Update breadcrumb
+            const questionTexts = {
+                'q1': 'Board Level?',
+                'q2': 'Ticket Number?',
+                'q3': 'Case Running?',
+                'q4_1': 'Escalated with MCC?',
+                'q4_2': 'Customer Complaint?',
+                'q5': 'TQM & EM Informed?'
+            };
+            
+            if (questionTexts[toNode]) {
+                breadcrumbPath.push(answer + ' → ' + questionTexts[toNode]);
+            } else {
+                breadcrumbPath.push(answer + ' → Result');
+            }
+            
+            updateBreadcrumb();
+            updateProgressBar();
+            
+            // Scroll to top
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function updateBreadcrumb() {
+            const breadcrumbElement = document.getElementById('breadcrumb');
+            breadcrumbElement.innerHTML = '';
+            
+            breadcrumbPath.forEach((item, index) => {
+                const span = document.createElement('span');
+                span.className = 'breadcrumb-item';
+                span.textContent = item;
+                breadcrumbElement.appendChild(span);
+            });
+        }
+
+        function updateProgressBar() {
+            const progress = (breadcrumbPath.length - 1) / totalSteps * 100;
+            document.getElementById('progressBar').style.width = Math.min(progress, 100) + '%';
+        }
+
+        function restart() {
+            // Hide all nodes
+            document.querySelectorAll('.node').forEach(node => {
+                node.classList.remove('active');
+            });
+            
+            // Show first question
+            document.getElementById('q1').classList.add('active');
+            
+            // Reset breadcrumb
+            breadcrumbPath = ['Start'];
+            updateBreadcrumb();
+            updateProgressBar();
+            
+            // Scroll to top
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Initialize progress bar
+        updateProgressBar();
+    </script>
+</body>
+</html>
